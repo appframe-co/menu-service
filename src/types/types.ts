@@ -12,9 +12,9 @@ export type TErrorResponse = {
 
 type TItem = {
   title: string;
+  url: string;
   subject: string;
   subjectId: string;
-  subjectParams: string;
   type: string;
   items: TItem[];
 }
@@ -52,6 +52,7 @@ export type TMenuInput = {
 	projectId: string;
   title: string;
   handle: string;
+  items: TItem;
 }
 
 export type TParameters = {

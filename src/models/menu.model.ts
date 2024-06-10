@@ -9,15 +9,16 @@ const ItemSchema: Schema = new Schema({
         maxlength: 225,
         required: true,
     },
+    url: {
+        type: String,
+        maxlength: 225,
+        required: true,
+    },
     subject: {
         type: String,
         maxlength: 1500,
     },
     subjectId: {
-        type: String,
-        default: null
-    },
-    subjectParams: {
         type: String,
         default: null
     },

@@ -78,13 +78,14 @@ router.get('/count', async (req: Request, res: Response, next: NextFunction) => 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { userId, projectId } = req.query as {userId: string, projectId: string};
-        let { title, handle } = req.body;
+        let { title, handle, items } = req.body;
 
         const data = await NewMenuController({
             userId,
             projectId,
             title,
             handle,
+            items
         });
 
         res.json(data);
@@ -102,7 +103,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { userId, projectId } = req.query as {userId: string, projectId: string};
-        let { id, title, handle } = req.body;
+        let { id, title, handle, items } = req.body;
 
         if (id !== req.params.id) {
             throw new Error('Menu ID error');
@@ -114,6 +115,7 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
             id,
             title,
             handle,
+            items
         });
 
         res.json(data);
