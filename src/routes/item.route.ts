@@ -1,26 +1,29 @@
 import express, { Request, Response, NextFunction } from 'express'
-import MenusController from '@/controllers/menu/menus.controller'
-import NewMenuController from '@/controllers/menu/new-menu.controller'
-import EditMenuController from '@/controllers/menu/edit-menu.controller'
-import DeleteMenuController from '@/controllers/menu/delete-menu.controller'
-import MenuController from '@/controllers/menu/menu.controller'
-import CountMenuController from '@/controllers/menu/count-menus.controller'
-import { TParameters } from '@/types/types'
+import ItemsController from '@/controllers/item/items.controller'
+import ItemController from '@/controllers/item/item.controller'
+import NewItemController from '@/controllers/item/new-item.controller'
+import EditItemController from '@/controllers/item/edit-item.controller'
+import CountItemController from '@/controllers/item/count-items.controller'
+import DeleteItemController from '@/controllers/item/delete-item.controller'
+import { TItemInput, TParameters } from '@/types/types'
 
 const router = express.Router();
 
 type TQueryGet = {
     userId: string;
     projectId: string;
+    menuId: string;
     limit: string;
     page: string;
     sinceId: string;
     ids: string;
+    parent_id: string;
+    depth_level: string;
 }
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userId, projectId, limit, page, sinceId, ids } = req.query as TQueryGet;
+        const { userId, projectId, menuId, limit, page, sinceId, ids, parent_id:parentId, depth_level:depthLevel } = req.query as TQueryGet;
 
         const parameters: TParameters = {};
         if (limit) {
@@ -35,14 +38,23 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
         if (ids) {
             parameters.ids = ids;
         }
+        if (parentId) {
+            parameters.parentId = parentId;
+        }
+        if (depthLevel) {
+            parameters.depthLevel = +depthLevel;
+        }
 
-        const data = await MenusController({
+        const data = await ItemsController({
             userId,
-            projectId
-        }, parameters);
+            projectId,
+            menuId
+        }, 
+        parameters);
 
         res.json(data);
     } catch (e) {
+
         let message = String(e);
 
         if (e instanceof Error) {
@@ -55,11 +67,12 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
 router.get('/count', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userId, projectId } = req.query as {userId: string, projectId: string};
+        const { userId, projectId, menuId } = req.query as {userId: string, projectId: string, menuId: string};
 
-        const data = await CountMenuController({
+        const data = await CountItemController({
             userId,
-            projectId
+            projectId,
+            menuId,
         });
 
         res.json(data);
@@ -76,15 +89,14 @@ router.get('/count', async (req: Request, res: Response, next: NextFunction) => 
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userId, projectId } = req.query as {userId: string, projectId: string};
-        let { name, code, items } = req.body;
+        let {userId, projectId, menuId, parentId, doc, subject, subjectId}: TItemInput = req.body;
 
-        const data = await NewMenuController({
-            userId,
+        const data = await NewItemController({
             projectId,
-            name,
-            code,
-            items
+            menuId,
+            parentId,
+            userId,
+            doc, subject, subjectId
         });
 
         res.json(data);
@@ -101,25 +113,22 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
 router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userId, projectId } = req.query as {userId: string, projectId: string};
-        let { id, name, code, items, translations } = req.body;
+        let {id, userId, projectId, menuId, doc, subject, subjectId}: TItemInput = req.body;
 
-        if (id !== req.params.id) {
-            throw new Error('Menu ID error');
+        if (req.params.id !== id) {
+            throw new Error('id invalid');
         }
 
-        const data = await EditMenuController({
-            userId,
-            projectId,
+        const data = await EditItemController({
             id,
-            name,
-            code,
-            items,
-            translations
+            projectId,
+            menuId,
+            userId,
+            doc, subject, subjectId
         });
 
         res.json(data);
-    } catch (e) {        
+    } catch (e) {
         let message = String(e);
 
         if (e instanceof Error) {
@@ -132,12 +141,13 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
 
 router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userId, projectId } = req.query as {userId: string, projectId: string};
-        const {id} = req.params;
+        const { userId, projectId, menuId} = req.query as {userId: string, projectId: string, menuId: string};
+        const { id } = req.params;
 
-        const data = await MenuController({
+        const data = await ItemController({
             userId,
             projectId,
+            menuId,
             id
         });
 
@@ -158,7 +168,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
         const { userId, projectId } = req.query as {userId: string, projectId: string};
         const { id } = req.params;
 
-        const data = await DeleteMenuController({
+        const data = await DeleteItemController({
             userId,
             projectId,
             id

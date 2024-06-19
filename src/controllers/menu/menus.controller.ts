@@ -1,5 +1,11 @@
 import Menu from '@/models/menu.model';
-import {TMenu, TMenusInput, TErrorResponse, TMenuModel, TParameters} from '@/types/types';
+import {TMenu, TMenusInput, TErrorResponse, TMenuModel, TParameters, TField, TSort} from '@/types/types';
+
+type TMenusFilter = {
+    userId: string;
+    projectId: string;
+    code?: string;
+}
 
 export default async function Menus(menuInput: TMenusInput, parameters: TParameters = {}): Promise<TErrorResponse | {menus: TMenu[]}>{
     try {
@@ -9,23 +15,21 @@ export default async function Menus(menuInput: TMenusInput, parameters: TParamet
             throw new Error('userId & projectId query required');
         }
 
+        const sort: TSort = {};
         const defaultLimit = 10;
-
-        const filter: any = {userId, projectId};
-        let {sinceId, limit=defaultLimit, page=1, ids} = parameters;
+        const filter: TMenusFilter = {userId, projectId};
+        let {limit=defaultLimit, code} = parameters;
 
         if (limit > 250) {
             limit = defaultLimit;
         }
-        if (sinceId) {
-            filter['_id'] = {$gt: sinceId};
-        }
-        if (ids) {
-            filter['_id'] = {$in: ids.split(',')};
+        if (code) {
+            filter.code = code;
         }
 
-        const skip = (page - 1) * limit;
-        const menus: TMenuModel[] = await Menu.find(filter).skip(skip).limit(limit);
+        sort['_id'] = 'asc';
+
+        const menus: TMenuModel[] = await Menu.find(filter).limit(limit).sort(sort);
         if (!menus) {
             throw new Error('invalid menus');
         }
@@ -34,10 +38,24 @@ export default async function Menus(menuInput: TMenusInput, parameters: TParamet
             id: menu.id,
             userId: menu.userId,
             projectId: menu.projectId,
-            title: menu.title,
-            handle: menu.handle,
-            items: menu.items,
-            createdAt: menu.createdAt
+            name: menu.name,
+            code: menu.code,
+            translations: menu.translations,
+            items: {
+                fields: menu.items.fields.map((field: TField) => ({
+                    id: field.id,
+                    type: field.type,
+                    name: field.name,
+                    key: field.key,
+                    description: field.description,
+                    validations: field.validations.map(v => ({
+                        type: v.type,
+                        code: v.code,
+                        value: v.value
+                    })),
+                    system: field.system
+                }))
+            }
         }));
 
         return {menus: output};

@@ -1,5 +1,5 @@
 import Menu from '@/models/menu.model';
-import { TErrorResponse, TMenu, TMenuModel } from '@/types/types'
+import { TField, TErrorResponse, TMenu, TMenuModel } from '@/types/types'
 
 export default async function MenuController(
     {userId, projectId, id}: 
@@ -13,10 +13,26 @@ export default async function MenuController(
 
         const output = {
             id: menu.id,
+            userId: menu.userId,
             projectId: menu.projectId,
-            title: menu.title, 
-            handle: menu.handle,
-            items: menu.items
+            name: menu.name,
+            code: menu.code,
+            translations: menu.translations,
+            items: {
+                fields: menu.items.fields.map((field: TField) => ({
+                    id: field.id,
+                    type: field.type,
+                    name: field.name,
+                    key: field.key,
+                    description: field.description,
+                    validations: field.validations.map(v => ({
+                        type: v.type,
+                        code: v.code,
+                        value: v.value
+                    })),
+                    system: field.system
+                }))
+            }
         };
 
         return {menu: output};

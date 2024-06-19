@@ -1,6 +1,9 @@
 import { produce } from "immer";
 import { validateString } from "./string.validator";
 import { validateNumber } from "./number.validator";
+import { validateDate } from "./date.validator";
+import { validateDateTime } from "./datetime.validator";
+import { TOptions } from "@/types/types";
 
 function setOutputOption(v: any=[], msg:string='') {
     const res = Array.isArray(v) ? [v[0], v[1] ? v[1] : msg] : [v, msg];
@@ -10,8 +13,8 @@ function setOutputOption(v: any=[], msg:string='') {
     return res;
 }
 
-export function validateArray(value: any, options:any={}) {
-    const {value: valueOptions={}, defaultValue=[]} = options;
+export function validateArray(value: any, options:TOptions={}) {
+    const {value: valueOptions=[], defaultValue=[]} = options;
     let outputValue: any = produce(value, (draft: any) => draft);
     const errors = [];
 
@@ -72,6 +75,26 @@ export function validateArray(value: any, options:any={}) {
                 }
                 if (valueOptions[0] === 'number') {
                     const [errorsValue, outputValue] = validateNumber(v, valueOptions[1]);
+                    if (errorsValue.length > 0) {
+                        errors.push(errorsValue[0]);
+                    } else {
+                        errors.push('');
+                    }
+
+                    return outputValue;
+                }
+                if (valueOptions[0] === 'datetime') {
+                    const [errorsValue, outputValue] = validateDateTime(v, valueOptions[1]);
+                    if (errorsValue.length > 0) {
+                        errors.push(errorsValue[0]);
+                    } else {
+                        errors.push('');
+                    }
+
+                    return outputValue;
+                }
+                if (valueOptions[0] === 'date') {
+                    const [errorsValue, outputValue] = validateDate(v, valueOptions[1]);
                     if (errorsValue.length > 0) {
                         errors.push(errorsValue[0]);
                     } else {

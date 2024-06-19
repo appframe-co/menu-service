@@ -3,33 +3,34 @@ import mongoose, { Schema, Document } from "mongoose";
 
 const ObjectId = Schema.ObjectId;
 
+const ValidationSchema: Schema = new Schema({
+    code: String,
+    type: String,
+    value: Schema.Types.Mixed
+  }, { _id : false });
+
+const FieldSchema: Schema = new Schema({
+    name: String,
+    key: String,
+    description: String,
+    type: String,
+    validations: [ValidationSchema],
+    system: Boolean
+  });
+
 const ItemSchema: Schema = new Schema({
-    title: {
-        type: String,
-        maxlength: 225,
-        required: true,
-    },
-    url: {
-        type: String,
-        maxlength: 225,
-        required: true,
-    },
-    subject: {
-        type: String,
-        maxlength: 1500,
-    },
-    subjectId: {
-        type: String,
-        default: null
-    },
-    type: {
-        type: String,
-        default: 'http'
-    },
-    items: [],
+    fields: {
+      type: [FieldSchema],
+      default: []
+    }
 });
-ItemSchema.set('toObject', { virtuals: true });
-ItemSchema.set('toJSON', { virtuals: true });
+
+const TranslationSchema: Schema = new Schema({
+    enabled: {
+      type: Boolean,
+      default: true
+    }
+});
 
 const MenusSchema: Schema = new Schema({
     userId: {
@@ -40,16 +41,17 @@ const MenusSchema: Schema = new Schema({
         type: ObjectId,
         require: true
     },
-    title: {
-        type: String,
-        maxlength: 255,
-        required: true
+    name: String,
+    code: {
+      type: String,
+      require: true
     },
-    handle: {
-        type: String,
-        maxlength: 500,
+    items: {
+        type: ItemSchema
     },
-    items: [ItemSchema],
+    translations: {
+        type: TranslationSchema
+    },
     createdAt: {
         type: Date,
         required: true,
