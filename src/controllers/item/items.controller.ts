@@ -2,10 +2,11 @@ import Item from '@/models/item.model';
 import Menu from  '@/models/menu.model'
 import {TDoc, TErrorResponse, TFile, TParameters, TField, TItemInput, TMenuModel, TItem, TItemModel} from '@/types/types';
 
-type TProps = {
+type TFieldOutput = Pick<TField, 'type'|'key'|'name'>;
+
+type TPropsOutput = {
     items: TItem[];
-    names: string[];
-    keys: string[];
+    fields: TFieldOutput[];
     parent: TItem|null;
 }
 
@@ -18,7 +19,7 @@ type TFilter = {
 }
 
 
-export default async function Items(itemInput: TItemInput, parameters: TParameters = {}): Promise<TErrorResponse | TProps>{
+export default async function Items(itemInput: TItemInput, parameters: TParameters = {}): Promise<TErrorResponse | TPropsOutput>{
     try {
         const {userId, projectId, menuId} = itemInput;
 
@@ -54,8 +55,11 @@ export default async function Items(itemInput: TItemInput, parameters: TParamete
         }
 
         // COMPARE items to menu-items
-        const names = menu.items.fields.map(b => b.name);
-        const keys = menu.items.fields.map(b => b.key);
+        const fields: TFieldOutput[] = menu.items.fields.map(f => ({key: f.key, name: f.name, type: f.type}))
+        const keys = fields.reduce((acc:string[], f:TFieldOutput) => {
+            acc.push(f.key);
+            return acc;
+        }, []);
 
         const parent: TItem|null = await (async function() {
             try {
@@ -91,7 +95,7 @@ export default async function Items(itemInput: TItemInput, parameters: TParamete
 
         const items: TItem[] = await getItems(filter, keys, menu.items.fields, projectId);
 
-        return {items, names, keys, parent};
+        return {items, fields, parent};
     } catch (error) {
         throw error;
     }

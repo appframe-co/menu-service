@@ -84,7 +84,7 @@ export default async function UpdateItem(itemInput: TItemInput): Promise<{item: 
                                     return acc;
                                 }, {});
         
-                                if (schemaData.type === 'single_line_text' || schemaData.type === 'multi_line_text') {
+                                if (schemaData.type === 'single_line_text' || schemaData.type === 'multi_line_text' || schemaData.type === 'rich_text') {
                                     const [errorsValue, valueValue] = validateString(valueData, options);
         
                                     if (Array.isArray(options.unique) ? options.unique[0] : options.unique) {
