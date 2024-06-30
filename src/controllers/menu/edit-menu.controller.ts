@@ -95,8 +95,8 @@ export default async function UpdateMenu(menuInput: TMenuInput): Promise<{menu: 
                                                 'number_integer', 'number_decimal',
                                                 'date_time', 'date',
                                                 'file_reference',
-                                                'list.single_line_text', 'list.date_time', 'list.date', 'list.file_reference', 'list.color',
-                                                'url_handle', 'boolean', 'money', 'color'
+                                                'list.single_line_text', 'list.date_time', 'list.date', 'list.file_reference', 'list.color', 'list.url',
+                                                'url_handle', 'boolean', 'money', 'color', 'url'
                                             ]]}
                                         );
                                         if (errorsType.length > 0) {
