@@ -19,7 +19,7 @@ export default async function MenuController(
             code: menu.code,
             translations: menu.translations,
             items: {
-                fields: menu.items.fields.map((field: TField) => ({
+                fields: menu.items.fields.map((field) => ({
                     id: field.id,
                     type: field.type,
                     name: field.name,
@@ -30,7 +30,8 @@ export default async function MenuController(
                         code: v.code,
                         value: v.value
                     })),
-                    system: field.system
+                    system: field.system,
+                    unit: field.unit
                 }))
             }
         };

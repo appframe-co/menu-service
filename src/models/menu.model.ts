@@ -15,7 +15,8 @@ const FieldSchema: Schema = new Schema({
     description: String,
     type: String,
     validations: [ValidationSchema],
-    system: Boolean
+    system: Boolean,
+    unit: String
   });
 
 const ItemSchema: Schema = new Schema({

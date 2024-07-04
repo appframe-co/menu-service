@@ -53,7 +53,8 @@ export default async function Menus(menuInput: TMenusInput, parameters: TParamet
                         code: v.code,
                         value: v.value
                     })),
-                    system: field.system
+                    system: field.system,
+                    unit: field.unit
                 }))
             }
         }));

@@ -69,6 +69,7 @@ type TFieldModel = {
   description: string;
   validations: TValidationFieldModel[];
   system: boolean;
+  unit: string;
 }
 
 export type TMenuModel = {
@@ -153,6 +154,7 @@ export type TField = {
   description: string;
   validations: TValidationField[];
   system: boolean;
+  unit: string;
 }
 
 export type TFile = {

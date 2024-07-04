@@ -87,7 +87,8 @@ export default async function UpdateMenu(menuInput: TMenuInput): Promise<{menu: 
                                     }
             
                                     menu.items.fields = valueFields.map((v:any, k:number) => {
-                                        const {id, type, name, key, description, validations, system} = v;
+                                        const {id, type, name, key, description, validations, system, unit} = v;
+                                        let output = {};
 
                                         const [errorsType, valueType] = validateString(type,
                                             {required: true, choices: [[
@@ -95,8 +96,8 @@ export default async function UpdateMenu(menuInput: TMenuInput): Promise<{menu: 
                                                 'number_integer', 'number_decimal',
                                                 'date_time', 'date',
                                                 'file_reference',
-                                                'list.single_line_text', 'list.date_time', 'list.date', 'list.file_reference', 'list.color', 'list.url',
-                                                'url_handle', 'boolean', 'money', 'color', 'url'
+                                                'list.single_line_text', 'list.number_integer', 'list.number_decimal', 'list.date_time', 'list.date', 'list.file_reference', 'list.color', 'list.url', 'list.dimension', 'list.volume', 'list.weight',
+                                                'url_handle', 'color', 'boolean', 'money', 'url', 'dimension', 'volume', 'weight'
                                             ]]}
                                         );
                                         if (errorsType.length > 0) {
@@ -128,7 +129,15 @@ export default async function UpdateMenu(menuInput: TMenuInput): Promise<{menu: 
                                         if (errorsDescription.length > 0) {
                                             errors.push({field: ['items', 'fields', k, 'description'], message: errorsDescription[0]}); 
                                         }
-                
+
+                                        if (v.hasOwnProperty('unit')) {
+                                            const [errorsUnit, valueUnit] = validateString(unit, {max: 255});
+                                            if (errorsUnit.length > 0) {
+                                                errors.push({field: ['fields', k, 'unit'], message: errorsUnit[0]}); 
+                                            }
+                                            output = {...output, unit: valueUnit};
+                                        }
+
                                         const validatedValidations = validations.map((v:any, j:number) => {
                                             const {code, value, type} = v;
                 
@@ -221,7 +230,8 @@ export default async function UpdateMenu(menuInput: TMenuInput): Promise<{menu: 
                                             errors.push({field: ['items', 'fields', k, 'system'], message: errorsSystem[0]}); 
                                         }
 
-                                        return {
+                                        output = {
+                                            ...output,
                                             id,
                                             type: valueType,
                                             name: valueName,
@@ -230,6 +240,8 @@ export default async function UpdateMenu(menuInput: TMenuInput): Promise<{menu: 
                                             validations: validatedValidations,
                                             system: valueSystem
                                         };
+
+                                        return output;
                                     });
                                 }
                             }
