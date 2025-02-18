@@ -165,12 +165,13 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userId, projectId } = req.query as {userId: string, projectId: string};
+        const { userId, projectId, menuId} = req.query as {userId: string, projectId: string, menuId: string};
         const { id } = req.params;
 
         const data = await DeleteItemController({
             userId,
             projectId,
+            menuId,
             id
         });
 

@@ -2,7 +2,7 @@ import slugify from 'slugify';
 
 import Item from '@/models/item.model';
 import Menu from '@/models/menu.model';
-import { TItemModel, TItem, TItemInput, TMenuModel } from '@/types/types';
+import { TItemModel, TItem, TItemInput, TMenuModel, TMenu } from '@/types/types';
 
 import { validateString } from '@/utils/validators/string.validator';
 import { validateNumber } from '@/utils/validators/number.validator';
@@ -11,11 +11,20 @@ import { validateDate } from '@/utils/validators/date.validator';
 import { validateDateTime } from '@/utils/validators/datetime.validator';
 import { checkItemUnique } from '@/utils/item-unique';
 
+type TItemOutput = {
+    item: TItem|null;
+    userErrors: any;
+    menu: {
+        id: string;
+        code: string;
+    }|null;
+};
+
 function isErrorItem(data: null|TItem): data is null {
     return (data as null) === null;
 }
 
-export default async function UpdateItem(itemInput: TItemInput): Promise<{item: TItem|null, userErrors: any}> {
+export default async function UpdateItem(itemInput: TItemInput): Promise<TItemOutput> {
     try {
         const {id, projectId, menuId, userId, ...itemBody} = itemInput;
 
@@ -437,7 +446,8 @@ export default async function UpdateItem(itemInput: TItemInput): Promise<{item: 
         if (Object.keys(errorsForm).length > 0) {
             return {
                 item: null,
-                userErrors: errorsForm
+                userErrors: errorsForm,
+                menu: null
             };
         }
 
@@ -471,7 +481,8 @@ export default async function UpdateItem(itemInput: TItemInput): Promise<{item: 
         if (Object.keys(errorsDB).length > 0) {
             return {
                 item: null,
-                userErrors: errorsDB
+                userErrors: errorsDB,
+                menu: null
             }
         }
 
@@ -514,13 +525,18 @@ export default async function UpdateItem(itemInput: TItemInput): Promise<{item: 
         if (Object.keys(errorsRes).length > 0) {
             return {
                 item: null,
-                userErrors: errorsRes
+                userErrors: errorsRes,
+                menu: null
             }
         }
 
         return {
             item: obtainedData.item,
-            userErrors: []
+            userErrors: [],
+            menu: {
+                id: menu.id,
+                code: menu.code
+            }
         };
     } catch (e) {
         let message;
@@ -529,7 +545,8 @@ export default async function UpdateItem(itemInput: TItemInput): Promise<{item: 
         }
         return {
             item: null,
-            userErrors: [{message}]
+            userErrors: [{message}],
+            menu: null
         };
     }
 }

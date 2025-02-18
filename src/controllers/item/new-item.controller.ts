@@ -15,7 +15,16 @@ function isErrorItem(data: null|TItem): data is null {
     return (data as null) === null;
 }
 
-export default async function CreateItem(itemInput: TItemInput): Promise<{item: TItem|null, userErrors: any}> {
+type TItemOutput = {
+    item: TItem|null;
+    userErrors: any;
+    menu: {
+        id: string;
+        code: string;
+    }|null;
+};
+
+export default async function CreateItem(itemInput: TItemInput): Promise<TItemOutput> {
     try {
         const {projectId, menuId, userId, parentId, ...itemBody} = itemInput;
 
@@ -23,13 +32,11 @@ export default async function CreateItem(itemInput: TItemInput): Promise<{item: 
             throw new Error('projectId & menuId & userId required');
         }
 
-        // GET menu
         const menu: TMenuModel|null = await Menu.findOne({userId, projectId, _id: menuId});
         if (!menu) {
             throw new Error('invalid menu');
         }
 
-        // compare item to menu-item
         const schemaDataBody = menu.items.fields.map(b => ({key: b.key, type: b.type, validations: b.validations}));
 
         const {errors: errorsForm, data: validatedData} = await (async (data, payload) => {
@@ -435,7 +442,8 @@ export default async function CreateItem(itemInput: TItemInput): Promise<{item: 
         if (Object.keys(errorsForm).length > 0) {
             return {
                 item: null,
-                userErrors: errorsForm
+                userErrors: errorsForm,
+                menu: null
             };
         }
 
@@ -475,7 +483,8 @@ export default async function CreateItem(itemInput: TItemInput): Promise<{item: 
         if (Object.keys(errorsDB).length > 0) {
             return {
                 item: null,
-                userErrors: errorsDB
+                userErrors: errorsDB,
+                menu: null
             }
         }
 
@@ -518,13 +527,18 @@ export default async function CreateItem(itemInput: TItemInput): Promise<{item: 
         if (Object.keys(errorsRes).length > 0) {
             return {
                 item: null,
-                userErrors: errorsRes
+                userErrors: errorsRes,
+                menu: null
             }
         }
 
         return {
             item: obtainedData.item,
-            userErrors: []
+            userErrors: [],
+            menu: {
+                id: menu.id,
+                code: menu.code
+            }
         };
     } catch (e) {
         let message;
@@ -533,7 +547,8 @@ export default async function CreateItem(itemInput: TItemInput): Promise<{item: 
         }
         return {
             item: null,
-            userErrors: [{message}]
+            userErrors: [{message}],
+            menu: null
         };
     }
 }
